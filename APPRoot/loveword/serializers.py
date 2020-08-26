@@ -80,9 +80,17 @@ class ComicSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-# 漫画主页
+# 漫画作者表
 class ComicAuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Comic_author
+        fields = "__all__"
+        depth = 1
+
+
+# 漫画章节表
+class ComicChapterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Comic_chapter
         fields = "__all__"
         depth = 1

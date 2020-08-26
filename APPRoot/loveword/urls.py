@@ -34,13 +34,15 @@ urlpatterns = [
     # 咪咕歌曲下载
     re_path(r'^music$', views.MiGu.as_view()),
 
-
     # 哔哩哔哩个人主页
     path("bilibili/", views.BIli.as_view()),
 
     # 漫画作品api
-    path("api/comic/",views.Comics.as_view()),
+    path("api/comic/", views.Comics.as_view()),
 
     # 漫画作者api
-    path("api/comic/author/",views.Comic_Author.as_view()),
+    path("api/comic/author/", views.Comic_Author.as_view()),
+
+    # 漫画章节api
+    path("api/comic/chapter/", views.Comic_chapters.as_view()),
 ]

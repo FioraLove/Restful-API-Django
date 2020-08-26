@@ -12,7 +12,7 @@ from django.http import JsonResponse
 from django.views import View
 from rest_framework.viewsets import GenericViewSet
 from rest_framework.versioning import URLPathVersioning
-from .models import Category, Article, Nmsl, UserInfo, Comic
+from .models import Category, Article, Nmsl, UserInfo, Comic, Comic_chapter, Comic_author
 from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from .serializers import New_Category_Serializer
 
@@ -478,7 +478,7 @@ class BIli(APIView):
 
 
 # 漫画作品api
-from .serializers import ComicSerializer, ComicAuthorSerializer
+from .serializers import ComicSerializer, ComicAuthorSerializer, ComicChapterSerializer
 
 
 class ComicLimitOffsetPagination(LimitOffsetPagination):
@@ -536,10 +536,19 @@ class Comics(APIView):
 
 
 class Comic_Author(APIView):
+    def get(self, request, *args, **kwargs):
+        uid = request.GET.get("uid")
+        if not uid:
+            return Response({"status": "failed:请携带uid参数", "results": {}})
+
+        queryset = Comic_author.objects.filter(uid=uid).first()
+        ser = ComicAuthorSerializer(instance=queryset, many=False)
+        if not ser:
+            return Response({"status": "failed:请携带正确的uid参数", "results": {}})
+        return Response({'status': "successful", 'results': ser.data})
+
     def post(self, request, *args, **kwargs):
         ser = ComicAuthorSerializer(data=request.data)
-        # print(request.data)
-        # print(ser)
         if ser.is_valid():
             ser.save()
             return Response({"status": "success"})
@@ -572,4 +581,35 @@ class Comic_Author(APIView):
     #     pk = kwargs.get('pk')
     #     Nmsl.objects.filter(id=pk).delete()
     #     return Response('删除成功')
+
+
+class ComicChapterLimitOffsetPagination(LimitOffsetPagination):
+    # 覆盖重写父类max_limit属性
+    max_limit = 800
+
+
+class Comic_chapters(APIView):
+    def get(self, request, *args, **kwargs):
+        uid = request.GET.get("uid")
+        queryset = Comic_chapter.objects.filter(uid=uid).order_by("chapter_number")
+        # 声明分页类
+        page_object = ComicChapterLimitOffsetPagination()
+        result = page_object.paginate_queryset(queryset, request, self)
+        ser = ComicChapterSerializer(instance=result, many=True)
+        # page模式按需求自定义字段：http://api.example.org/accounts/?page=4&page_size=100
+        # return Response({'count': page_object.page.paginator.count, 'result': ser.data})
+        # offset模式按需要求自定义字段 http://api.example.org/accounts/?offset=400&limit=100
+        return Response({'count': page_object.count, 'results': ser.data})
+
+    def post(self, request, *args, **kwargs):
+        ser = ComicChapterSerializer(data=request.data)
+        # print(request.data)
+        # print(ser)
+        if ser.is_valid():
+            ser.save()
+            return Response({"status": "success"})
+        else:
+            return Response({"status": "failed"})
+
+
 

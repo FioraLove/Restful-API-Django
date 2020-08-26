@@ -81,3 +81,15 @@ class Comic_author(models.Model):
     state = models.CharField(verbose_name="状态", max_length=5)    # 更新状态：1表示连载中，0表示完结
     content = models.TextField(verbose_name="简介")
     objects = models.Manager()
+
+
+class Comic_chapter(models.Model):
+    """
+    漫画章节图片的js解密url
+    """
+    uid = models.CharField(verbose_name="漫画作品ID", max_length=10)
+    cid = models.CharField(verbose_name="章节ID", max_length=10)
+    chapter_title = models.CharField(verbose_name="章节标题", max_length=100)
+    chapter_number = models.IntegerField(verbose_name="章节编号")
+    images_url = models.TextField(verbose_name="图片url")
+    objects = models.Manager()
