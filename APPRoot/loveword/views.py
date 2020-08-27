@@ -489,7 +489,7 @@ class ComicLimitOffsetPagination(LimitOffsetPagination):
 class Comics(APIView):
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
-        queryset = Comic.objects.filter(category=category).order_by("judge")
+        queryset = Comic.objects.filter(category=category).order_by("-judge")
         # 声明分页类
         page_object = ComicLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
@@ -612,4 +612,15 @@ class Comic_chapters(APIView):
             return Response({"status": "failed"})
 
 
+# 视频解析模块
+from .middleware import bilibili_parse
 
+
+class VideoParse(APIView):
+    def post(self, request, *args, **kwargs):
+        category = request.data.get("category")
+        if category == "3":
+            bv = request.data.get("url")
+            bili = bilibili_parse.Bili(bv)
+            res = bili.get_url()
+            return Response(res)

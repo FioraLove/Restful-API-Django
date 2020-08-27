@@ -34,6 +34,9 @@ urlpatterns = [
     # 咪咕歌曲下载
     re_path(r'^music$', views.MiGu.as_view()),
 
+    # 视频解析api
+    path("api/video/parse/", views.VideoParse.as_view()),
+
     # 哔哩哔哩个人主页
     path("bilibili/", views.BIli.as_view()),
 
