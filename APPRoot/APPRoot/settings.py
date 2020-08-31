@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/2.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.2/ref/settings/
 """
-
+import datetime
 import os
 import pymysql
 
@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'loveword',
     'corsheaders',
-    'rest_framework'
+    'rest_framework',
+    'rest_framework.authtoken'
 ]
 CORS_ORIGIN_ALLOW_ALL = True  # 新增的跨域访问设置
 
@@ -142,6 +143,16 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'loveword', 'static')
 ]
 
+#  JWT_EXPIRATION_DELTA 指明token的有效期
+JWT_AUTH = {
+    # 配置过期时间
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
+    # # 是否可刷新
+    # 'JWT_ALLOW_REFRESH': True,
+    # # 刷新过期时间
+    # 'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
+}
+
 # REST_FRAMEWORK配置文件
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': (
@@ -151,17 +162,10 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '60/minute',  # 未认证用户一天只许访问100次        
         'user': '100/minute',  # 认证用户一天可以访问1000次
-        'limit': '500/minute'
-    }
+        'limit': '100/minute'
+    },
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
 }
-
-# REST_FRAMEWORK = {
-#     'DEFAULT_THROTTLE_CLASSES': [
-#         'rest_framework.throttling.AnonRateThrottle',
-#         'rest_framework.throttling.UserRateThrottle'
-#     ],
-#     'DEFAULT_THROTTLE_RATES': {
-#         'anon': '100/day',
-#         'user': '1000/day'
-#     }
-# }

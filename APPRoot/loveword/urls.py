@@ -2,6 +2,7 @@
 from django.conf.urls import url
 from django.urls import path, re_path
 from . import views  # 导入views文件中的视图函数(标准写法)
+from rest_framework_jwt.views import ObtainJSONWebToken
 
 urlpatterns = [
     # 获取一条文章的信息
@@ -32,7 +33,7 @@ urlpatterns = [
     re_path(r'^user$', views.UserView.as_view()),
 
     # 咪咕歌曲下载
-    re_path(r'^music$', views.MiGu.as_view()),
+    # re_path(r'^music$', views.MiGu.as_view()),
 
     # 视频解析api
     path("api/video/parse/", views.VideoParse.as_view()),
@@ -48,4 +49,7 @@ urlpatterns = [
 
     # 漫画章节api
     path("api/comic/chapter/", views.Comic_chapters.as_view()),
+
+    # JWT认证
+    path("api/secret/login/", ObtainJSONWebToken.as_view()),
 ]

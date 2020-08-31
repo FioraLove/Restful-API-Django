@@ -1,19 +1,14 @@
-import random
-import re
-import time
 import uuid
 import requests
 from django.forms import model_to_dict
+from rest_framework import mixins
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.request import Request
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views import View
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.versioning import URLPathVersioning
+from rest_framework_jwt import authentication
+
 from .models import Category, Article, Nmsl, UserInfo, Comic, Comic_chapter, Comic_author
-from rest_framework.throttling import UserRateThrottle, AnonRateThrottle
 from .serializers import New_Category_Serializer
 
 
@@ -112,6 +107,8 @@ class MySimpleRateThrottle(SimpleRateThrottle):
     def get_cache_key(self, request, view):
         return self.get_ident(request)
 
+from rest_framework.permissions import IsAuthenticated
+
 
 class ArticleView(APIView):
     # authentication_classes = []
@@ -119,9 +116,18 @@ class ArticleView(APIView):
     # throttle_classes = [MySimpleRateThrottle, ]    # 自定义分流类
 
     # throttle_classes = (AnonRateThrottle, UserRateThrottle,)
+    # authentication_classes = (SessionAuthentication, BasicAuthentication)
+    permission_classes = [IsAuthenticated, ]
+    # authentication_classes = (authentication,)
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
+        print(request.user)
+        content = {
+            'user': request.user,  # `django.contrib.auth.User` instance.
+            'auth': request.auth  # None
+        }
+        print(content)
         if not pk:
             queryset = Article.objects.all()
             ser = ArticleSerializer(instance=queryset, many=True)
@@ -237,15 +243,6 @@ class Nmsl8(APIView):
 
     def get(self, request, *args, **kwargs):
         queryset = Nmsl.objects.all()
-        print(request.headers)
-        print(request.method)
-        print(request.path)  # /nmsl/ndsl/10/
-        print(request.query_params)  # <QueryDict: {'offset': ['0'], 'limit': ['3']}>
-        print(request.data)
-        print(request.query_params.get("offset"))
-        print(request.query_params.get("limit"))
-        print(request.user)
-
         # 声明分页类
         page_object = NmslLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
@@ -293,8 +290,6 @@ class Nmsl8(APIView):
 
 
 # 用户认证组件
-from rest_framework.authentication import BaseAuthentication
-from rest_framework import exceptions
 from .serializers import LoginSerializer
 
 
@@ -362,98 +357,6 @@ class UserView(APIView):
         print(request.user)
         print(request.auth)
         return Response('user')
-
-
-# MiGU音乐下载
-headers = {
-    'Referer': 'https://m.music.migu.cn/',
-    'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.75 Mobile Safari/537.36'
-}
-detail_url = 'http://m.music.migu.cn/migu/remoting/cms_detail_tag?cpid={copyrightId}'
-player_url = 'https://app.pd.nf.migu.cn/MIGUM3.0/v1.0/content/sub/listenSong.do?channel=mx&copyrightId={copyrightId}&contentId={contentId}&toneFlag={toneFlag}&resourceType={resourceType}&netType=00'
-
-
-def get_url(url: str):
-    """
-    http://music.migu.cn/v3/music/song/*********
-    author、audioName、audios
-    """
-    data = {}
-    # get copyrightId
-    copyrightId = re.findall(r"song/(\d+)", url)[0]
-
-    # get detail
-    rep = requests.get(detail_url.format(copyrightId=copyrightId), headers=headers, timeout=6)
-    if rep.status_code != 200 or rep.json()["data"] is None:
-        # print({"msg": "获取失败,请检查链接是否正确"})
-        return None
-
-    json = rep.json()["data"]  # type: dict
-
-    # author
-    singerName = json["singerName"]  # type: list
-    author = "null" if len(singerName) < 1 else "&".join(singerName)
-
-    # audioName
-    audioName = json["songName"]
-
-    # contentId
-    c_item = json.get("qq")  # type:dict
-
-    if not c_item:
-        return {"msg": "获取失败"}
-    contentId = c_item["productId"]
-
-    # toneFlag
-    toneFlag = "HQ" if json["hasHQqq"] == "1" else "LQ"
-
-    video_url = player_url.format(copyrightId=copyrightId,
-                                  contentId=contentId,
-                                  toneFlag=toneFlag,
-                                  resourceType=2)
-
-    data["author"] = author
-    data["audioName"] = audioName
-    data["videos"] = video_url
-    data["coverL"] = json["picL"]
-    data["coverM"] = json["picM"]
-    data["coverS"] = json["picS"]
-    return data
-
-
-def search(kw, page):
-    search_url = "https://m.music.migu.cn/migu/remoting/scr_search_tag?rows=20&type=2&keyword={}&pgc={}".format(kw,
-                                                                                                                page)
-    session = requests.Session()
-    try:
-        response = session.get(url=search_url, headers=headers, timeout=10)
-        if response.status_code == 200:
-            rows = response.json()
-            # 数据总数
-            counts = rows.get("pgt")
-            #
-            musics = rows["musics"]
-            numbers = []
-            for i in musics:
-                cp = "http://music.migu.cn/v3/music/song/" + i["copyrightId"]
-                data = get_url(cp)
-                if data is None:
-                    continue
-                numbers.append(data)
-                time.sleep(random.random())
-            return {"count": counts, "page": page, "rows": numbers}
-    except Exception as e:
-        print(e)
-
-
-class MiGu(APIView):
-    throttle_classes = [AnonRateThrottle, ]
-
-    def post(self, request, *args, **kwargs):
-        kw = request.data.get("keyword")
-        page = int(request.data.get("page"))
-        results = search(kw=kw, page=page)
-        return Response(results)
 
 
 # bilibili个人主页模块
@@ -613,14 +516,63 @@ class Comic_chapters(APIView):
 
 
 # 视频解析模块
-from .middleware import bilibili_parse
+from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, momo_parse, \
+    pearvideo_parse, meipai_parse
 
 
 class VideoParse(APIView):
+    throttle_classes = [AnonRateThrottle, ]
+
     def post(self, request, *args, **kwargs):
         category = request.data.get("category")
-        if category == "3":
+        if category == "1":
+            uid = request.data.get("url")
+            douyin = douyin_parse.DouYin(uid=uid)
+            res = douyin.run()
+            return Response(res)
+        elif category == "3":
             bv = request.data.get("url")
             bili = bilibili_parse.Bili(bv)
             res = bili.get_url()
             return Response(res)
+        elif category == "4":
+            vid = request.data.get("url")
+            haokan = haokan_parse.HaoKan(vid)
+            res = haokan.get_url()
+            return Response(res)
+        elif category == "5":
+            vid = request.data.get("url")
+            sixRoom = sixroom_parse.sixRoom(vid)
+            res = sixRoom.get_video()
+            return Response(res)
+        elif category == "6":
+            vid = request.data.get("url")
+            quanmin = quanmin_parse.QuanMin(vid)
+            res = quanmin.get_info()
+            return Response(res)
+        elif category == "7":
+            feedid = request.data.get("url")
+            momo = momo_parse.MoMo(feedid)
+            res = momo.get_video()
+            return Response(res)
+        elif category == "8":
+            vid = request.data.get("url")
+            pear_video = pearvideo_parse.PearVideo(vid)
+            res = pear_video.get_video()
+            return Response(res)
+        elif category == "9":
+            url = request.data.get("url")
+            meiPai = meipai_parse.MeiPai(url=url)
+            res = meiPai.get_video()
+            return Response(res)
+        else:
+            return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
+
+
+
+class UserCenterViewSet(GenericViewSet, mixins.RetrieveModelMixin):
+    # 设置必须登录才能访问的权限类
+    permission_classes = [IsAuthenticated, ]
+
+    queryset = Article.objects.filter().all()
+    serializer_class = ArticleSerializer
