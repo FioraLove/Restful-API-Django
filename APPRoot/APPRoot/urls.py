@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin/secret/home/', admin.site.urls),
     # home/为主URL，而include的作用是拼接APP目录下的urls.py文件中的path
     # 即此例的URL为：home/timer(必须按这种标准方法写URL)
     path('nmsl/', include("loveword.urls"), name="NMSL")

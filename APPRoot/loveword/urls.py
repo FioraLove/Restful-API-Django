@@ -2,7 +2,7 @@
 from django.conf.urls import url
 from django.urls import path, re_path
 from . import views  # 导入views文件中的视图函数(标准写法)
-from rest_framework_jwt.views import ObtainJSONWebToken
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     # 获取一条文章的信息
@@ -50,6 +50,9 @@ urlpatterns = [
     # 漫画章节api
     path("api/comic/chapter/", views.Comic_chapters.as_view()),
 
-    # JWT认证
-    path("api/secret/login/", ObtainJSONWebToken.as_view()),
+    # # JWT认证
+    # path("api/secret/login/", ObtainJSONWebToken.as_view()),
+
+    # Token认证，通过输入默认的系统表的auth_user用户表里的账号密码来获取token
+    re_path(r"^api/secret/token-auth/", obtain_auth_token),
 ]

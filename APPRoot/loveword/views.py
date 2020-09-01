@@ -2,7 +2,7 @@ import uuid
 import requests
 from django.forms import model_to_dict
 from rest_framework import mixins
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
@@ -107,18 +107,18 @@ class MySimpleRateThrottle(SimpleRateThrottle):
     def get_cache_key(self, request, view):
         return self.get_ident(request)
 
+
 from rest_framework.permissions import IsAuthenticated
 
 
 class ArticleView(APIView):
-    # authentication_classes = []
-    # permission_classes = []
-    # throttle_classes = [MySimpleRateThrottle, ]    # 自定义分流类
-
+    # throttle_classes = [MySimpleRateThrottle, ]
+    # 自定义分流类
     # throttle_classes = (AnonRateThrottle, UserRateThrottle,)
-    # authentication_classes = (SessionAuthentication, BasicAuthentication)
+
+    # 局部认证和登录,认证和权限（必须同时存在）
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
-    # authentication_classes = (authentication,)
 
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
@@ -568,11 +568,3 @@ class VideoParse(APIView):
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
 
-
-
-class UserCenterViewSet(GenericViewSet, mixins.RetrieveModelMixin):
-    # 设置必须登录才能访问的权限类
-    permission_classes = [IsAuthenticated, ]
-
-    queryset = Article.objects.filter().all()
-    serializer_class = ArticleSerializer

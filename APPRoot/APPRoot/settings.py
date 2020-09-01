@@ -143,17 +143,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'loveword', 'static')
 ]
 
-#  JWT_EXPIRATION_DELTA 指明token的有效期
-JWT_AUTH = {
-    # 配置过期时间
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=3),
-    # # 是否可刷新
-    # 'JWT_ALLOW_REFRESH': True,
-    # # 刷新过期时间
-    # 'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
-}
-
+TOKEN_LIFETIME = 7
 # REST_FRAMEWORK配置文件
+
 REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_CLASSES': (
         'rest_framework.throttling.AnonRateThrottle',
@@ -164,8 +156,11 @@ REST_FRAMEWORK = {
         'user': '100/minute',  # 认证用户一天可以访问1000次
         'limit': '100/minute'
     },
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-    ),
+    # 'DEFAULT_AUTHENTICATION_CLASSES': (
+    #     'rest_framework.authentication.TokenAuthentication',
+    #     'rest_framework.authentication.SessionAuthentication',
+    # ),
+
+    # 异常处理 ： https://www.cnblogs.com/crazymagic/articles/10023528.html
+    'EXCEPTION_HANDLER' : 'utils.exceptions.custom_exception_handler', #这是使用自定制异常处理
 }
