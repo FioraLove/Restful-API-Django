@@ -12,5 +12,5 @@ class TokenAuthentication(BaseAuthentication):
         token = request.query_params.get('token')
         user_object = models.UserInfo.objects.filter(token=token).first()
         if user_object:
-            return (user_object, token)
-        return (None, None)
+            return user_object, token
+        return None, None
