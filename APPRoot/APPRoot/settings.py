@@ -162,5 +162,5 @@ REST_FRAMEWORK = {
     # ),
 
     # 异常处理 ： https://www.cnblogs.com/crazymagic/articles/10023528.html
-    'EXCEPTION_HANDLER' : 'utils.exceptions.custom_exception_handler', #这是使用自定制异常处理
+    'EXCEPTION_HANDLER' : 'utils.exceptions.custom_exception_handler',  # 这是使用自定制异常处理
 }
