@@ -30,5 +30,8 @@ urlpatterns = [
     path("api/secret/video/", views.AVideos.as_view()),
 
     # 加密视频章节
-    path("api/secret/video/chapter/", views.AVideoChapters.as_view())
+    path("api/secret/video/chapter/", views.AVideoChapters.as_view()),
+
+    # 加密隐私图片
+    path("api/secret/picture/", views.AImages.as_view())
 ]

@@ -53,3 +53,11 @@ class AVideoChapterSerializer(serializers.ModelSerializer):
         model = models.AVideo_chapter
         fields = "__all__"
         depth = 1
+
+
+# 加密图片地址序列化
+class APictureSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.APicture
+        fields = "__all__"
+        depth = 1

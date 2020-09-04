@@ -4,12 +4,12 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Nmsl, Comic, Comic_chapter, Comic_author, AVideo, AVideo_chapter
+from .models import Nmsl, Comic, Comic_chapter, Comic_author, AVideo, AVideo_chapter, APicture
 from .serializers import NmslAndNdslSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination  # 分页方式二
 from .serializers import ComicSerializer, ComicAuthorSerializer, ComicChapterSerializer, AVideoSerializer, \
-    AVideoChapterSerializer
+    AVideoChapterSerializer, APictureSerializer
 
 
 # 嘴臭生成器模块
@@ -200,6 +200,29 @@ class AVideoChapters(APIView):
 
     def post(self, request, *args, **kwargs):
         ser = AVideoChapterSerializer(data=request.data)
+        if ser.is_valid():
+            ser.save()
+            return Response({"status": "success"})
+        else:
+            return Response({"status": ser.errors})
+
+
+# 隐私加密图片大全
+class AImages(APIView):
+    authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, *args, **kwargs):
+        category = request.GET.get("category")
+        queryset = APicture.objects.filter(category=category)
+        # 声明分页类
+        page_object = AVideoLimitOffsetPagination()
+        result = page_object.paginate_queryset(queryset, request, self)
+        ser = APictureSerializer(instance=result, many=True)
+        return Response({'count': page_object.count, 'results': ser.data})
+
+    def post(self, request, *args, **kwargs):
+        ser = APictureSerializer(data=request.data)
         if ser.is_valid():
             ser.save()
             return Response({"status": "success"})
