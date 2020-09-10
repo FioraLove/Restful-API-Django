@@ -1,5 +1,6 @@
 from typing import Optional, Any
 import requests
+import base64
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
@@ -87,6 +88,12 @@ class BIli(APIView):
             return Response({"status": 0, "info": e})
 
 
+# # bilibili个人主页模块
+# class BiLiStar(APIView):
+#     def get(self, request, *args, **kwargs):
+#         pass
+
+
 # 漫画作品大全api模块
 class ComicLimitOffsetPagination(LimitOffsetPagination):
     # 覆盖重写父类max_limit属性
@@ -96,7 +103,8 @@ class ComicLimitOffsetPagination(LimitOffsetPagination):
 class Comics(APIView):
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
-        queryset = Comic.objects.filter(category=category).order_by("-judge")
+        decode_str = base64.decodebytes(bytes(category, encoding="utf-8"))  # 字节型
+        queryset = Comic.objects.filter(category=decode_str.decode()).order_by("-judge")
         # 声明分页类
         page_object = ComicLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
@@ -118,8 +126,8 @@ class Comic_Author(APIView):
         uid = request.GET.get("uid")
         if not uid:
             return Response({"status": "failed:请携带uid参数", "results": {}})
-
-        queryset = Comic_author.objects.filter(uid=uid).first()
+        decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
+        queryset = Comic_author.objects.filter(uid=decode_str.decode()).first()
         ser = ComicAuthorSerializer(instance=queryset, many=False)
         if not ser:
             return Response({"status": "failed:请携带正确的uid参数", "results": {}})
@@ -143,7 +151,8 @@ class ComicChapterLimitOffsetPagination(LimitOffsetPagination):
 class Comic_chapters(APIView):
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
-        queryset = Comic_chapter.objects.filter(uid=uid).order_by("chapter_number")
+        decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
+        queryset = Comic_chapter.objects.filter(uid=decode_str.decode()).order_by("chapter_number")
         # 声明分页类
         page_object = ComicChapterLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
@@ -239,7 +248,9 @@ class VideoParse(APIView):
     throttle_classes = [AnonRateThrottle, ]
 
     def post(self, request, *args, **kwargs):
-        category = request.data.get("category")
+        cate = request.data.get("category")
+        decode_str = base64.decodebytes(bytes(cate, encoding="utf-8"))  # 字节型
+        category = decode_str.decode()
         if category == "1":
             uid = request.data.get("url")
             douyin = douyin_parse.DouYin(uid=uid)
