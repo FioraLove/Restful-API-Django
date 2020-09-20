@@ -241,7 +241,7 @@ class AImages(APIView):
 
 # 短视频解析模块
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, momo_parse, \
-    pearvideo_parse, meipai_parse, changku_parse
+    pearvideo_parse, meipai_parse, changku_parse, weibo_parse
 
 
 class VideoParse(APIView):
@@ -295,6 +295,11 @@ class VideoParse(APIView):
             url = request.data.get("url")
             changku = changku_parse.ChangKuVideo(url=url)
             res = changku.get_video()
+            return Response(res)
+        elif category == "11":
+            url = request.data.get("url")
+            weibo = weibo_parse.WeiBo(url=url)
+            res = weibo.get_video()
             return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
