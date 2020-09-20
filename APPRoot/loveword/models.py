@@ -90,3 +90,23 @@ class AVideo_chapter(models.Model):
     vid = models.CharField(verbose_name="视频作品ID", max_length=10)
     images_url = models.TextField(verbose_name="图片url")
     objects = models.Manager()
+
+
+# 隐私加密图片
+class APicture(models.Model):
+    """
+    加密隐私图片
+    """
+    items = (
+        (1, "巨乳"),
+        (2, "大公鸡"),
+        (3, "写真"),
+        (4, "口交"),
+        (5, "无码"),
+        (6, "制服"),
+        (7, "主播"),
+    )
+    title = models.CharField(verbose_name="图片标题", max_length=250, blank=True)
+    images_url = models.CharField(verbose_name="图片url", max_length=250, blank=True)
+    category = models.CharField(verbose_name="分类", choices=items, max_length=5, default=1)
+    objects = models.Manager()
