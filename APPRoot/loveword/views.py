@@ -241,11 +241,11 @@ class AImages(APIView):
 
 # 短视频解析模块
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, momo_parse, \
-    pearvideo_parse, meipai_parse, changku_parse, weibo_parse
+    pearvideo_parse, meipai_parse, changku_parse, weibo_parse, zuiyou_parse
 
 
 class VideoParse(APIView):
-    throttle_classes = [AnonRateThrottle, ]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def post(self, request, *args, **kwargs):
         cate = request.data.get("category")
@@ -300,6 +300,11 @@ class VideoParse(APIView):
             url = request.data.get("url")
             weibo = weibo_parse.WeiBo(url=url)
             res = weibo.get_video()
+            return Response(res)
+        elif category == "12":
+            url = request.data.get("url")
+            zuiyou = zuiyou_parse.ZuiYou(url=url)
+            res = zuiyou.get_video()
             return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
