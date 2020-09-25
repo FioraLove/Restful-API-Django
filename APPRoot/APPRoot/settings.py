@@ -167,8 +167,8 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ),
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '30/minute',  # 未认证用户一天只许访问100次        
-        'user': '100/minute',  # 认证用户一天可以访问1000次
+        'anon': '20/minute',  # 未认证用户一分钟只许访问100次        
+        'user': '60/minute',  # 认证用户一分钟可以访问1000次
         'limit': '100/minute'
     },
     # 'DEFAULT_AUTHENTICATION_CLASSES': (

@@ -61,3 +61,11 @@ class APictureSerializer(serializers.ModelSerializer):
         model = models.APicture
         fields = "__all__"
         depth = 1
+
+
+# 留言-回复序列化
+class CommentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Comments
+        fields = "__all__"
+        depth = 1

@@ -49,8 +49,8 @@ class Comic_author(models.Model):
     author = models.CharField(verbose_name="作者名", max_length=50)
     title = models.CharField(verbose_name="标题", max_length=50)
     location = models.CharField(verbose_name="分类", max_length=50)
-    copyright = models.CharField(verbose_name="版权", max_length=5)    # 版权0(无版权)或1
-    state = models.CharField(verbose_name="状态", max_length=5)    # 更新状态：1表示连载中，0表示完结
+    copyright = models.CharField(verbose_name="版权", max_length=5)  # 版权0(无版权)或1
+    state = models.CharField(verbose_name="状态", max_length=5)  # 更新状态：1表示连载中，0表示完结
     content = models.TextField(verbose_name="简介")
     objects = models.Manager()
 
@@ -109,4 +109,18 @@ class APicture(models.Model):
     title = models.CharField(verbose_name="图片标题", max_length=250, blank=True)
     images_url = models.CharField(verbose_name="图片url", max_length=250, blank=True)
     category = models.CharField(verbose_name="分类", choices=items, max_length=5, default=1)
+    objects = models.Manager()
+
+
+class Comments(models.Model):
+    """
+    留言模块：评论留言
+    """
+    ip = models.CharField(verbose_name="留言ip地址", max_length=20, blank=True, null=True)
+    uid = models.CharField(verbose_name="用户id", max_length=20, blank=True, null=True)
+    location = models.CharField(verbose_name="用户地址", max_length=50, blank=True, null=True)
+    email = models.EmailField(verbose_name="邮箱", max_length=50, blank=True, )
+    contents = models.CharField(verbose_name="留言内容", max_length=240, blank=True, null=True)
+    reply = models.CharField(verbose_name="回复", max_length=240, blank=True, null=True)
+    update = models.DateField(verbose_name="创建时间", auto_now_add=True)
     objects = models.Manager()
