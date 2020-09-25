@@ -6,11 +6,12 @@ from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Nmsl, Comic, Comic_chapter, Comic_author, AVideo, AVideo_chapter, APicture
+from . import models
 from .serializers import NmslAndNdslSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination  # 分页方式二
 from .serializers import ComicSerializer, ComicAuthorSerializer, ComicChapterSerializer, AVideoSerializer, \
-    AVideoChapterSerializer, APictureSerializer
+    AVideoChapterSerializer, APictureSerializer, CommentsSerializer
 
 
 # 嘴臭生成器模块
@@ -241,7 +242,7 @@ class AImages(APIView):
 
 # 短视频解析模块
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, momo_parse, \
-    pearvideo_parse, meipai_parse, changku_parse, weibo_parse, zuiyou_parse
+    pearvideo_parse, meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse
 
 
 class VideoParse(APIView):
@@ -306,5 +307,42 @@ class VideoParse(APIView):
             zuiyou = zuiyou_parse.ZuiYou(url=url)
             res = zuiyou.get_video()
             return Response(res)
+        elif category == "13":
+            url = request.data.get("url")
+            pipixia = pipixia_parse.PiPiXia(url=url)
+            res = pipixia.get_video()
+            return Response(res)
+        elif category == "14":
+            url = request.data.get("url")
+            acfun = acfun_parse.AcFun(url=url)
+            res = acfun.get_video()
+            return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
+
+
+# 留言，回复模块
+class Comments_Reply(APIView):
+    # get请求分页查询
+    def get(self, request, *args, **kwargs):
+        queryset = models.Comments.objects.all().values("ip", "uid", "contents", "reply", "update", "location").order_by("-update")
+        # 声明分页类(借用之前隐私视频的分页功能)
+        page_object = AVideoLimitOffsetPagination()
+        result = page_object.paginate_queryset(queryset, request, self)
+        ser = CommentsSerializer(instance=result, many=True)
+        return Response({'count': page_object.count, 'results': ser.data})
+
+    # post请求创建留言板
+    def post(self, request, *args, **kwargs):
+        info = request.data
+        cate = info.get("ip")
+        decode_str = base64.decodebytes(bytes(cate, encoding="utf-8"))  # 字节型
+        decode_ip = decode_str.decode()
+        info["ip"] = decode_ip
+        ser = CommentsSerializer(data=info)
+        print(request.data)
+        if ser.is_valid():
+            ser.save()
+            return Response({"status": 1, "content": request.data.get('ip')})
+        else:
+            return Response({"status": ser.errors})
