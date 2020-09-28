@@ -241,8 +241,9 @@ class AImages(APIView):
 
 
 # 短视频解析模块
-from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, momo_parse, \
-    pearvideo_parse, meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse
+from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, pearvideo_parse, \
+    meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse,momo_parse, \
+    kge_parse
 
 
 class VideoParse(APIView):
@@ -316,6 +317,16 @@ class VideoParse(APIView):
             url = request.data.get("url")
             acfun = acfun_parse.AcFun(url=url)
             res = acfun.get_video()
+            return Response(res)
+        elif category == "15":
+            url = request.data.get("url")
+            kuaishou = kuaishou_parse.KuaiShou(url=url)
+            res = kuaishou.get_video()
+            return Response(res)
+        elif category == "16":
+            url = request.data.get("url")
+            kge = kge_parse.KGe(url=url)
+            res = kge.get_video()
             return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
