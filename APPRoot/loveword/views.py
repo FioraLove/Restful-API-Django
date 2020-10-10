@@ -11,7 +11,7 @@ from .serializers import NmslAndNdslSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination  # 分页方式二
 from .serializers import ComicSerializer, ComicAuthorSerializer, ComicChapterSerializer, AVideoSerializer, \
-    AVideoChapterSerializer, APictureSerializer, CommentsSerializer
+    AVideoChapterSerializer, APictureSerializer, CommentsSerializer, ComicChapterCatalogSerializer
 
 
 # 嘴臭生成器模块
@@ -146,19 +146,26 @@ class Comic_Author(APIView):
 # 漫画章节分页模块
 class ComicChapterLimitOffsetPagination(LimitOffsetPagination):
     # 覆盖重写父类max_limit属性
-    max_limit = 800
+    max_limit = 40
 
 
 class Comic_chapters(APIView):
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
-        decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
-        queryset = Comic_chapter.objects.filter(uid=decode_str.decode()).order_by("chapter_number")
-        # 声明分页类
-        page_object = ComicChapterLimitOffsetPagination()
-        result = page_object.paginate_queryset(queryset, request, self)
-        ser = ComicChapterSerializer(instance=result, many=True)
-        return Response({'count': page_object.count, 'results': ser.data})
+        cid = request.GET.get("cid")
+        if not cid:
+            decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
+            queryset = Comic_chapter.objects.filter(uid=decode_str.decode()).order_by("chapter_number")
+            # 声明分页类
+            page_object = ComicChapterLimitOffsetPagination()
+            result = page_object.paginate_queryset(queryset, request, self)
+            ser = ComicChapterCatalogSerializer(instance=result, many=True)
+            return Response({'count': page_object.count, 'results': ser.data})
+        else:
+            decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
+            queryset = Comic_chapter.objects.filter(uid=decode_str.decode(), cid=cid).first()
+            ser = ComicChapterSerializer(instance=queryset, many=False)
+            return Response({'status': 0, 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
         ser = ComicChapterSerializer(data=request.data)

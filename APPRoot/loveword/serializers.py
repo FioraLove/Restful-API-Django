@@ -31,11 +31,19 @@ class ComicAuthorSerializer(serializers.ModelSerializer):
         depth = 1
 
 
-# 漫画章节表
+# 漫画具体章节表
 class ComicChapterSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Comic_chapter
         fields = "__all__"
+        depth = 1
+
+
+# 漫画章节目录大全序列化
+class ComicChapterCatalogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Comic_chapter
+        fields = ["chapter_title", "cid", "chapter_number", 'uid']
         depth = 1
 
 
