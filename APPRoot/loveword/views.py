@@ -11,7 +11,7 @@ from .serializers import NmslAndNdslSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination  # 分页方式二
 from .serializers import ComicSerializer, ComicAuthorSerializer, ComicChapterSerializer, AVideoSerializer, \
-    AVideoChapterSerializer, APictureSerializer, CommentsSerializer
+    AVideoChapterSerializer, APictureSerializer, CommentsSerializer, ComicChapterCatalogSerializer
 
 
 # 嘴臭生成器模块
@@ -146,19 +146,26 @@ class Comic_Author(APIView):
 # 漫画章节分页模块
 class ComicChapterLimitOffsetPagination(LimitOffsetPagination):
     # 覆盖重写父类max_limit属性
-    max_limit = 800
+    max_limit = 40
 
 
 class Comic_chapters(APIView):
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
-        decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
-        queryset = Comic_chapter.objects.filter(uid=decode_str.decode()).order_by("chapter_number")
-        # 声明分页类
-        page_object = ComicChapterLimitOffsetPagination()
-        result = page_object.paginate_queryset(queryset, request, self)
-        ser = ComicChapterSerializer(instance=result, many=True)
-        return Response({'count': page_object.count, 'results': ser.data})
+        cid = request.GET.get("cid")
+        if not cid:
+            decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
+            queryset = Comic_chapter.objects.filter(uid=decode_str.decode()).order_by("chapter_number")
+            # 声明分页类
+            page_object = ComicChapterLimitOffsetPagination()
+            result = page_object.paginate_queryset(queryset, request, self)
+            ser = ComicChapterCatalogSerializer(instance=result, many=True)
+            return Response({'count': page_object.count, 'results': ser.data})
+        else:
+            decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
+            queryset = Comic_chapter.objects.filter(uid=decode_str.decode(), cid=cid).first()
+            ser = ComicChapterSerializer(instance=queryset, many=False)
+            return Response({'status': 0, 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
         ser = ComicChapterSerializer(data=request.data)
@@ -241,8 +248,9 @@ class AImages(APIView):
 
 
 # 短视频解析模块
-from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, momo_parse, \
-    pearvideo_parse, meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse
+from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, pearvideo_parse, \
+    meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse,momo_parse, \
+    kge_parse, xigua_parse, miaopai_parse, xhs_parse
 
 
 class VideoParse(APIView):
@@ -316,6 +324,31 @@ class VideoParse(APIView):
             url = request.data.get("url")
             acfun = acfun_parse.AcFun(url=url)
             res = acfun.get_video()
+            return Response(res)
+        elif category == "15":
+            url = request.data.get("url")
+            kuaishou = kuaishou_parse.KuaiShou(url=url)
+            res = kuaishou.get_video()
+            return Response(res)
+        elif category == "16":
+            url = request.data.get("url")
+            kge = kge_parse.KGe(url=url)
+            res = kge.get_video()
+            return Response(res)
+        elif category == "17":
+            url = request.data.get("url")
+            xigua = xigua_parse.XiGua(url=url)
+            res = xigua.get_video()
+            return Response(res)
+        elif category == "18":
+            url = request.data.get("url")
+            miaopai = miaopai_parse.MiaoPai(url=url)
+            res = miaopai.get_video()
+            return Response(res)
+        elif category == "19":
+            url = request.data.get("url")
+            xhs = xhs_parse.XiaoHongShu(url=url)
+            res = xhs.get_video()
             return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
