@@ -110,7 +110,6 @@ DATABASES = {
         # # mysql数据库的端口号
         # 'PORT': '3306',
 
-
     }
 }
 
@@ -175,7 +174,11 @@ REST_FRAMEWORK = {
     #     'rest_framework.authentication.TokenAuthentication',
     #     'rest_framework.authentication.SessionAuthentication',
     # ),
-
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser'
+    ],
     # 异常处理 ： https://www.cnblogs.com/crazymagic/articles/10023528.html
-    'EXCEPTION_HANDLER' : 'utils.exceptions.custom_exception_handler',  # 这是使用自定制异常处理
+    'EXCEPTION_HANDLER': 'utils.exceptions.custom_exception_handler',  # 这是使用自定制异常处理
 }

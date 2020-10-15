@@ -250,7 +250,7 @@ class AImages(APIView):
 # 短视频解析模块
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, pearvideo_parse, \
     meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse,momo_parse, \
-    kge_parse, xigua_parse, miaopai_parse, xhs_parse
+    kge_parse, xigua_parse, miaopai_parse, xhs_parse, xks_parse
 
 
 class VideoParse(APIView):
@@ -258,8 +258,15 @@ class VideoParse(APIView):
 
     def post(self, request, *args, **kwargs):
         cate = request.data.get("category")
+        signature = request.data.get("signature")
+        timers = request.data.get("time")
+        # base64解密category
         decode_str = base64.decodebytes(bytes(cate, encoding="utf-8"))  # 字节型
         category = decode_str.decode()
+        # base64解密签名算法
+        x_sign = base64.decodebytes(bytes(signature, encoding="utf-8"))
+        if x_sign.decode() != "0#badwoman%-_-%#0&"+timers:
+            return Response("兄弟萌 😘😘😘，i9研发出错，请检查相关参数 ✖✖✖")
         if category == "1":
             uid = request.data.get("url")
             douyin = douyin_parse.DouYin(uid=uid)
@@ -349,6 +356,11 @@ class VideoParse(APIView):
             url = request.data.get("url")
             xhs = xhs_parse.XiaoHongShu(url=url)
             res = xhs.get_video()
+            return Response(res)
+        elif category == "20":
+            url = request.data.get("url")
+            xks = xks_parse.XiaoKaXiu(url=url)
+            res = xks.get_video()
             return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
