@@ -4,10 +4,11 @@ certifi==2020.6.20
 chardet==3.0.4
 colorama==0.4.3
 cssselect==1.1.0
-Django==3.1
+Django==3.0
 django-cors-headers==3.5.0
 djangorestframework==3.11.1
 djangorestframework-jwt==1.11.0
+drf-extensions==0.6.0
 idna==2.10
 isort==4.3.21
 lazy-object-proxy==1.4.3
