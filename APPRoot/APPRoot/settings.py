@@ -21,22 +21,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = '5eel2pz171_-i^l*c8xnew9n97na7xkccbvm5%%^wz0daaft%z'
-PRIVATE_KEY = """
-MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALI5hWq+zx021uJ3
-U+xHlnzLICwq7YvmlOL/igo6phwjL+ygSJUo1PiWZrYgP3g9abs5WWF/lfqSIP0W
-ASQ3GM7Cn+EVdLo+owVHl0zPVSL7G4NlkxEdO0LMrkksPlBKE2eSBPnHgZzOHiB2
-pogfWM4TAaLLoz6DSOe3l5+f1yUZAgMBAAECgYBmQyMOkNV+Sc0avKVm2dy7VkHr
-leYfc/rSFRY7sFNHqdkBySZcj8VDrejZb797WqGkT8+9ZdvEnrxW+51EDmkopNuE
-16yTc5iljIcYHvq1vidzCMBxCN9ZaSETy3ygmCZxmaDfaWqLWMbRi8EBCWhfFrch
-sr/La/I6LOCo8xHiUQJBANZBzrBGElCHUchufU2cj07Uw7zQB69QKCY7OMpvTusH
-1TpviIgdn6gnL42AxmtelHkDjr5Lwq9mDOw7HgEJ/d8CQQDU8pQ2K/BWKGIRTfoH
-FHMnMIwVAl1D3vGHJNmP2oYJPxTAaCZfpWuMSNYm+NjcPiLXruMozsu5wqAy9OEf
-LUwHAkEAiKegdL28oLAucXBHa2EX5me+EId+30p40SmkpzknVLDCR2sr4eVDF7Um
-l1IzO/gvKqAiQy1/FvA3/dQW5wLAcQJAVQiQ+pjNHfp+Pp6+qrkVyp5uMa2CBKow
-FGE4p2MBhwuzg6mTOTpbGeez7FgOcNQ3IZ1qhE8ftwvq4K48fzCdXQJAWbeg/pHR
-OQIDK5LcXrlY2B2/0IGkpI0K3dzLt3Dwio9lZt8U/dUVo8fhF7RK8nkDAXHdqM4t
-QBGWJiywOVj7uQ==
-"""
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -181,4 +166,12 @@ REST_FRAMEWORK = {
     ],
     # 异常处理 ： https://www.cnblogs.com/crazymagic/articles/10023528.html
     'EXCEPTION_HANDLER': 'utils.exceptions.custom_exception_handler',  # 这是使用自定制异常处理
+}
+
+# drf框架的缓存机制
+REST_FRAMEWORK_EXTENSIONS = {
+    'DEFAULT_CACHE_RESPONSE_TIMEOUT': 24 * 60 * 60,  # 即指定有效期为3个小时
+    'DEFAULT_CACHE_ERRORS': False,
+    # 缓存存储
+    'DEFAULT_USE_CACHE': 'default'
 }

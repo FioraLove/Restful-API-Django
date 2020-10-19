@@ -9,6 +9,7 @@ from .models import Nmsl, Comic, Comic_chapter, Comic_author, AVideo, AVideo_cha
 from . import models
 from .serializers import NmslAndNdslSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework_extensions.cache.decorators import cache_response
 from rest_framework.pagination import LimitOffsetPagination  # 分页方式二
 from .serializers import ComicSerializer, ComicAuthorSerializer, ComicChapterSerializer, AVideoSerializer, \
     AVideoChapterSerializer, APictureSerializer, CommentsSerializer, ComicChapterCatalogSerializer
@@ -23,6 +24,7 @@ class NmslLimitOffsetPagination(LimitOffsetPagination):
 class Nmsl8(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
+    @cache_response()
     def get(self, request, *args, **kwargs):
         queryset = Nmsl.objects.all()
         # 声明分页类
@@ -70,6 +72,7 @@ class Nmsl8(APIView):
 
 # bilibili个人主页模块
 class BIli(APIView):
+    @cache_response()
     def get(self, request, *args, **kwargs):
         url = "https://api.bilibili.com/x/space/arc/search?mid=215893581&pn=1&ps=25&jsonp=jsonp"
         headers = {
@@ -89,12 +92,6 @@ class BIli(APIView):
             return Response({"status": 0, "info": e})
 
 
-# # bilibili个人主页模块
-# class BiLiStar(APIView):
-#     def get(self, request, *args, **kwargs):
-#         pass
-
-
 # 漫画作品大全api模块
 class ComicLimitOffsetPagination(LimitOffsetPagination):
     # 覆盖重写父类max_limit属性
@@ -102,6 +99,7 @@ class ComicLimitOffsetPagination(LimitOffsetPagination):
 
 
 class Comics(APIView):
+    @cache_response()
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
         decode_str = base64.decodebytes(bytes(category, encoding="utf-8"))  # 字节型
@@ -123,6 +121,7 @@ class Comics(APIView):
 
 # 漫画作者相关信息模块
 class Comic_Author(APIView):
+    @cache_response()
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
         if not uid:
@@ -150,6 +149,7 @@ class ComicChapterLimitOffsetPagination(LimitOffsetPagination):
 
 
 class Comic_chapters(APIView):
+    @cache_response()
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
         cid = request.GET.get("cid")
@@ -186,6 +186,7 @@ class AVideos(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
+    @cache_response()
     def get(self, request, *args, **kwargs):
         queryset = AVideo.objects.all().order_by("-judge")
         # 声明分页类
@@ -208,6 +209,7 @@ class AVideoChapters(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
+    @cache_response()
     def get(self, request, *args, **kwargs):
         vid = request.GET.get("vid")
         queryset = AVideo_chapter.objects.filter(vid=vid)
@@ -229,6 +231,7 @@ class AImages(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
+    @cache_response()
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
         queryset = APicture.objects.filter(category=category)
@@ -249,7 +252,7 @@ class AImages(APIView):
 
 # 短视频解析模块
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, pearvideo_parse, \
-    meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse,momo_parse, \
+    meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse, momo_parse, \
     kge_parse, xigua_parse, miaopai_parse, xhs_parse, xks_parse, qsp_parse, kaiyan_parse
 
 
@@ -265,7 +268,7 @@ class VideoParse(APIView):
         category = decode_str.decode()
         # base64解密签名算法
         x_sign = base64.decodebytes(bytes(signature, encoding="utf-8"))
-        if x_sign.decode() != "0#badwoman%-_-%#0&"+timers:
+        if x_sign.decode() != "0#badwoman%-_-%#0&" + timers:
             return Response("兄弟萌 😘😘😘，i9研发出错，请检查相关参数 ✖✖✖")
         if category == "1":
             uid = request.data.get("url")
@@ -379,8 +382,10 @@ class VideoParse(APIView):
 # 留言，回复模块
 class Comments_Reply(APIView):
     # get请求分页查询
+    @cache_response(timeout=6 * 60 * 60, cache='default')
     def get(self, request, *args, **kwargs):
-        queryset = models.Comments.objects.all().values("ip", "uid", "contents", "reply", "update", "location").order_by("-update")
+        queryset = models.Comments.objects.all().values("ip", "uid", "contents", "reply", "update",
+                                                        "location").order_by("-update")
         # 声明分页类(借用之前隐私视频的分页功能)
         page_object = AVideoLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
