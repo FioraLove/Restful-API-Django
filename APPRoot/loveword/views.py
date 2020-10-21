@@ -24,7 +24,6 @@ class NmslLimitOffsetPagination(LimitOffsetPagination):
 class Nmsl8(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
-    @cache_response()
     def get(self, request, *args, **kwargs):
         queryset = Nmsl.objects.all()
         # 声明分页类
@@ -99,7 +98,6 @@ class ComicLimitOffsetPagination(LimitOffsetPagination):
 
 
 class Comics(APIView):
-    @cache_response()
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
         decode_str = base64.decodebytes(bytes(category, encoding="utf-8"))  # 字节型
@@ -121,7 +119,6 @@ class Comics(APIView):
 
 # 漫画作者相关信息模块
 class Comic_Author(APIView):
-    @cache_response()
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
         if not uid:
@@ -149,7 +146,6 @@ class ComicChapterLimitOffsetPagination(LimitOffsetPagination):
 
 
 class Comic_chapters(APIView):
-    @cache_response()
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
         cid = request.GET.get("cid")
@@ -186,7 +182,6 @@ class AVideos(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
-    @cache_response()
     def get(self, request, *args, **kwargs):
         queryset = AVideo.objects.all().order_by("-judge")
         # 声明分页类
@@ -209,7 +204,6 @@ class AVideoChapters(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
-    @cache_response()
     def get(self, request, *args, **kwargs):
         vid = request.GET.get("vid")
         queryset = AVideo_chapter.objects.filter(vid=vid)
@@ -231,7 +225,6 @@ class AImages(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
-    @cache_response()
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
         queryset = APicture.objects.filter(category=category)
@@ -398,7 +391,6 @@ class VideoParse(APIView):
 # 留言，回复模块
 class Comments_Reply(APIView):
     # get请求分页查询
-    @cache_response(timeout=6 * 60 * 60, cache='default')
     def get(self, request, *args, **kwargs):
         queryset = models.Comments.objects.all().values("ip", "uid", "contents", "reply", "update",
                                                         "location").order_by("-update")
