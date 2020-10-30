@@ -9,7 +9,7 @@ import re
 爬取思路：
     1. 通过APP里的分享获取视频url：https://h5.pipix.com/s/JAtW8Yg/
     2. url重定向到真实跳转地址：简化后.,https://h5.pipix.com/item/6869230768778909965
-    3. 但真正视频地址确是在get请求中（误打误撞，发现里不加水印的视频地址,但发现视频会短一截，晕😵😵）
+    3. 但真正视频地址确是在get请求中（误打误撞，发现里不加水印的视频地址）
         - 加水印：https://h5.pipix.com/bds/webapi/item/detail/?item_id=6869230768778909965&source=share
         - 不加水印：https://h5.pipix.com/bds/webapi/item/detail/?item_id=6869230768778909965 （PS：少了一个参数）
     4. 整理的API：
