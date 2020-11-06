@@ -247,7 +247,7 @@ class AImages(APIView):
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, pearvideo_parse, \
     meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse, momo_parse, \
     kge_parse, xigua_parse, miaopai_parse, xhs_parse, xks_parse, qsp_parse, kaiyan_parse, weishi_parse, huoshan_parse,\
-    huya_parse, douyin2_parse, lvzhou_parse
+    huya_parse, douyin2_parse, lvzhou_parse, pipifunny, vue_parse
 
 
 class VideoParse(APIView):
@@ -393,6 +393,16 @@ class VideoParse(APIView):
             url = request.data.get("url")
             lv_zhou = lvzhou_parse.LvZhou(url=url)
             res = lv_zhou.parse()
+            return Response(res)
+        elif category == "28":
+            url = request.data.get("url")
+            ppgx = pipifunny.PiPiFunny(url=url)
+            res = ppgx.parse()
+            return Response(res)
+        elif category == "29":
+            url = request.data.get("url")
+            vue = vue_parse.Vue(url=url)
+            res = vue.parse()
             return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
