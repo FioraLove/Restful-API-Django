@@ -247,7 +247,7 @@ class AImages(APIView):
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, pearvideo_parse, \
     meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse, momo_parse, \
     kge_parse, xigua_parse, miaopai_parse, xhs_parse, xks_parse, qsp_parse, kaiyan_parse, weishi_parse, huoshan_parse,\
-    huya_parse, douyin2_parse, lvzhou_parse, pipifunny, vue_parse
+    huya_parse, douyin2_parse, lvzhou_parse, pipifunny, vue_parse, bixin_parse, doupai_parse, before_parse, kuxiu_parse
 
 
 class VideoParse(APIView):
@@ -403,6 +403,26 @@ class VideoParse(APIView):
             url = request.data.get("url")
             vue = vue_parse.Vue(url=url)
             res = vue.parse()
+            return Response(res)
+        elif category == "31":  # 这是使用31：因为30已经被Instagram占用了
+            url = request.data.get("url")
+            bi_xin = bixin_parse.BiXin(url=url)
+            res = bi_xin.parse()
+            return Response(res)
+        elif category == "32":
+            url = request.data.get("url")
+            dou_pai = doupai_parse.DouPai(url=url)
+            res = dou_pai.parse()
+            return Response(res)
+        elif category == "33":
+            url = request.data.get("url")
+            before = before_parse.Before(url=url)
+            res = before.parse()
+            return Response(res)
+        elif category == "34":
+            url = request.data.get("url")
+            ku_xiu = kuxiu_parse.KuXiu(url=url)
+            res = ku_xiu.parse()
             return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
