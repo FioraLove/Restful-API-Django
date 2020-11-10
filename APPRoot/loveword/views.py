@@ -24,7 +24,6 @@ class NmslLimitOffsetPagination(LimitOffsetPagination):
 class Nmsl8(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
-    @cache_response()
     def get(self, request, *args, **kwargs):
         queryset = Nmsl.objects.all()
         # 声明分页类
@@ -99,7 +98,6 @@ class ComicLimitOffsetPagination(LimitOffsetPagination):
 
 
 class Comics(APIView):
-    @cache_response()
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
         decode_str = base64.decodebytes(bytes(category, encoding="utf-8"))  # 字节型
@@ -121,7 +119,6 @@ class Comics(APIView):
 
 # 漫画作者相关信息模块
 class Comic_Author(APIView):
-    @cache_response()
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
         if not uid:
@@ -149,7 +146,6 @@ class ComicChapterLimitOffsetPagination(LimitOffsetPagination):
 
 
 class Comic_chapters(APIView):
-    @cache_response()
     def get(self, request, *args, **kwargs):
         uid = request.GET.get("uid")
         cid = request.GET.get("cid")
@@ -186,7 +182,6 @@ class AVideos(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
-    @cache_response()
     def get(self, request, *args, **kwargs):
         queryset = AVideo.objects.all().order_by("-judge")
         # 声明分页类
@@ -209,7 +204,6 @@ class AVideoChapters(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
-    @cache_response()
     def get(self, request, *args, **kwargs):
         vid = request.GET.get("vid")
         queryset = AVideo_chapter.objects.filter(vid=vid)
@@ -231,7 +225,6 @@ class AImages(APIView):
     authentication_classes = [SessionAuthentication, BasicAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated, ]
 
-    @cache_response()
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
         queryset = APicture.objects.filter(category=category)
@@ -253,7 +246,8 @@ class AImages(APIView):
 # 短视频解析模块
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, pearvideo_parse, \
     meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse, momo_parse, \
-    kge_parse, xigua_parse, miaopai_parse, xhs_parse, xks_parse, qsp_parse, kaiyan_parse, weishi_parse
+    kge_parse, xigua_parse, miaopai_parse, xhs_parse, xks_parse, qsp_parse, kaiyan_parse, weishi_parse, huoshan_parse,\
+    huya_parse, douyin2_parse, lvzhou_parse, pipifunny, vue_parse, bixin_parse, doupai_parse, before_parse, kuxiu_parse
 
 
 class VideoParse(APIView):
@@ -380,6 +374,56 @@ class VideoParse(APIView):
             wei_shi = weishi_parse.WeiShi(url=url)
             res = wei_shi.get_video()
             return Response(res)
+        elif category == "24":
+            url = request.data.get("url")
+            huo_shan = huoshan_parse.HuoShan(url=url)
+            res = huo_shan.get_video()
+            return Response(res)
+        elif category == "25":
+            url = request.data.get("url")
+            huya = huya_parse.HuYa(url=url)
+            res = huya.get_video()
+            return Response(res)
+        elif category == "26":
+            url = request.data.get("url")
+            dou_yin = douyin2_parse.DouYin2(url=url)
+            res = dou_yin.get_video()
+            return Response(res)
+        elif category == "27":
+            url = request.data.get("url")
+            lv_zhou = lvzhou_parse.LvZhou(url=url)
+            res = lv_zhou.parse()
+            return Response(res)
+        elif category == "28":
+            url = request.data.get("url")
+            ppgx = pipifunny.PiPiFunny(url=url)
+            res = ppgx.parse()
+            return Response(res)
+        elif category == "29":
+            url = request.data.get("url")
+            vue = vue_parse.Vue(url=url)
+            res = vue.parse()
+            return Response(res)
+        elif category == "31":  # 这是使用31：因为30已经被Instagram占用了
+            url = request.data.get("url")
+            bi_xin = bixin_parse.BiXin(url=url)
+            res = bi_xin.parse()
+            return Response(res)
+        elif category == "32":
+            url = request.data.get("url")
+            dou_pai = doupai_parse.DouPai(url=url)
+            res = dou_pai.parse()
+            return Response(res)
+        elif category == "33":
+            url = request.data.get("url")
+            before = before_parse.Before(url=url)
+            res = before.parse()
+            return Response(res)
+        elif category == "34":
+            url = request.data.get("url")
+            ku_xiu = kuxiu_parse.KuXiu(url=url)
+            res = ku_xiu.parse()
+            return Response(res)
         else:
             return Response("兄弟萌 😘😘😘，i9正在研发中，请耐心等待佳音 🏃🏃🏃")
 
@@ -387,7 +431,6 @@ class VideoParse(APIView):
 # 留言，回复模块
 class Comments_Reply(APIView):
     # get请求分页查询
-    @cache_response(timeout=6 * 60 * 60, cache='default')
     def get(self, request, *args, **kwargs):
         queryset = models.Comments.objects.all().values("ip", "uid", "contents", "reply", "update",
                                                         "location").order_by("-update")
