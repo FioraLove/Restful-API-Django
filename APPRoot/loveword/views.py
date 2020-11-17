@@ -183,12 +183,20 @@ class AVideos(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, *args, **kwargs):
-        queryset = AVideo.objects.all().order_by("-judge")
-        # 声明分页类
-        page_object = AVideoLimitOffsetPagination()
-        result = page_object.paginate_queryset(queryset, request, self)
-        ser = AVideoSerializer(instance=result, many=True)
-        return Response({'count': page_object.count, 'results': ser.data})
+        # keyword定义查询条件
+        keyword = request.GET.get("keyword")
+        if keyword == "" or keyword is None:
+            queryset = AVideo.objects.all().order_by("-judge")
+            page_object = AVideoLimitOffsetPagination()
+            result = page_object.paginate_queryset(queryset, request, self)
+            ser = AVideoSerializer(instance=result, many=True)
+            return Response({'count': page_object.count, 'results': ser.data})
+        else:
+            queryset = AVideo.objects.filter(title__contains=keyword).order_by("-judge")
+            page_object = AVideoLimitOffsetPagination()
+            result = page_object.paginate_queryset(queryset, request, self)
+            ser = AVideoSerializer(instance=result, many=True)
+            return Response({'count': page_object.count, 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
         ser = AVideoSerializer(data=request.data)
