@@ -124,3 +124,18 @@ class Comments(models.Model):
     reply = models.CharField(verbose_name="回复", max_length=240, blank=True, null=True)
     update = models.DateField(verbose_name="创建时间", auto_now_add=True)
     objects = models.Manager()
+
+
+class Bilibili(models.Model):
+    """
+    bilibili主页视频模块
+    """
+    bvid = models.CharField(verbose_name="bv号", max_length=20, primary_key=True)
+    comment = models.IntegerField(verbose_name="评论数", blank=True, null=True, default=0)
+    created = models.CharField(verbose_name="创建时间", max_length=20, blank=True, null=True)
+    pic = models.CharField(verbose_name="图片地址", max_length=100, blank=True, null=True)
+    title = models.CharField(verbose_name="标题", max_length=100, blank=True, null=True)
+    length = models.CharField(verbose_name="视频长度", max_length=10, blank=True, null=True)
+    play = models.IntegerField(verbose_name="播放量", blank=True, null=True, default=0)
+    ts = models.IntegerField(verbose_name="时间戳", blank=True, null=True)
+    objects = models.Manager()

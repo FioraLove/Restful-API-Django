@@ -3,6 +3,16 @@ from rest_framework import serializers
 from . import models
 
 
+class BilibiliIndex(serializers.ModelSerializer):
+    """
+    bilibili-个人主页
+    """
+    class Meta:
+        model = models.Bilibili
+        fields = "__all__"
+        depth = 1
+
+
 # 嘴臭生成器序列化
 class NmslAndNdslSerializer(serializers.ModelSerializer):
     # level = serializers.SerializerMethodField()

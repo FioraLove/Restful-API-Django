@@ -14,9 +14,6 @@ urlpatterns = [
     # 哔哩哔哩个人主页
     path("bilibili/", views.BIli.as_view()),
 
-    # # 哔哩哔哩点赞+粉丝+关注...
-    # path("bilistar/", views.BiLiStar.as_view()),
-
     # 漫画作品api
     path("api/comic/", views.Comics.as_view()),
 

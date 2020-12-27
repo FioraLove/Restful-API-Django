@@ -1,18 +1,15 @@
-from typing import Optional, Any
-import requests
+# -*- coding:utf-8 -*-
 import base64
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
-from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from . import models
+from . import serializers
+from typing import Optional, Any
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import Nmsl, Comic, Comic_chapter, Comic_author, AVideo, AVideo_chapter, APicture
-from . import models
-from .serializers import NmslAndNdslSerializer
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework_extensions.cache.decorators import cache_response
-from rest_framework.pagination import LimitOffsetPagination  # 分页方式二
-from .serializers import ComicSerializer, ComicAuthorSerializer, ComicChapterSerializer, AVideoSerializer, \
-    AVideoChapterSerializer, APictureSerializer, CommentsSerializer, ComicChapterCatalogSerializer
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 
 
 # 嘴臭生成器模块
@@ -25,15 +22,15 @@ class Nmsl8(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def get(self, request, *args, **kwargs):
-        queryset = Nmsl.objects.all()
+        queryset = models.Nmsl.objects.all()
         # 声明分页类
         page_object = NmslLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
-        ser = NmslAndNdslSerializer(instance=result, many=True)
+        ser = serializers.NmslAndNdslSerializer(instance=result, many=True)
         return Response({'count': page_object.count, 'result': ser.data})
 
     def post(self, request, *args, **kwargs):
-        ser = NmslAndNdslSerializer(data=request.data)
+        ser = serializers.NmslAndNdslSerializer(data=request.data)
         print(request.data)
         if ser.is_valid():
             ser.save()
@@ -46,8 +43,8 @@ class Nmsl8(APIView):
         全部更新
         """
         pk = kwargs.get('pk')
-        article_object = Nmsl.objects.filter(id=pk).first()
-        ser = NmslAndNdslSerializer(instance=article_object, data=request.data)
+        article_object = models.Nmsl.objects.filter(id=pk).first()
+        ser = serializers.NmslAndNdslSerializer(instance=article_object, data=request.data)
         if ser.is_valid():
             ser.save()
             return Response(ser.data)
@@ -56,8 +53,8 @@ class Nmsl8(APIView):
     def patch(self, request, *args, **kwargs):
         """局部"""
         pk: Optional[Any] = kwargs.get('pk')
-        article_object = Nmsl.objects.filter(id=pk).first()
-        ser = NmslAndNdslSerializer(instance=article_object, data=request.data, partial=True)
+        article_object = models.Nmsl.objects.filter(id=pk).first()
+        ser = serializers.NmslAndNdslSerializer(instance=article_object, data=request.data, partial=True)
         if ser.is_valid():
             ser.save()
             return Response(ser.data)
@@ -65,7 +62,7 @@ class Nmsl8(APIView):
 
     def delete(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
-        Nmsl.objects.filter(id=pk).delete()
+        models.Nmsl.objects.filter(id=pk).delete()
         return Response('删除成功')
 
 
@@ -73,22 +70,9 @@ class Nmsl8(APIView):
 class BIli(APIView):
     @cache_response()
     def get(self, request, *args, **kwargs):
-        url = "https://api.bilibili.com/x/space/arc/search?mid=215893581&pn=1&ps=25&jsonp=jsonp"
-        headers = {
-            "origin": "https://space.bilibili.com",
-            "referer": "https://space.bilibili.com/215893581",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/84.0.4147.125 Safari/537.36"
-        }
-        session = requests.Session()
-        try:
-            response = session.get(url=url, headers=headers, timeout=3)
-            if response.status_code == 200:
-                result = response.json()
-                vlist = result["data"]["list"]["vlist"]
-                page = result["data"]["page"]
-                return Response({"status": 1, "vlist": vlist, "page": page})
-        except Exception as e:
-            return Response({"status": 0, "info": e})
+        queryset = models.Bilibili.objects.all().order_by("-ts")
+        ser = serializers.BilibiliIndex(instance=queryset, many=True)
+        return Response({"status": 1, "msg": "success", "results": ser.data})
 
 
 # 漫画作品大全api模块
@@ -101,15 +85,15 @@ class Comics(APIView):
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
         decode_str = base64.decodebytes(bytes(category, encoding="utf-8"))  # 字节型
-        queryset = Comic.objects.filter(category=decode_str.decode()).order_by("-judge")
+        queryset = models.Comic.objects.filter(category=decode_str.decode()).order_by("-judge")
         # 声明分页类
         page_object = ComicLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
-        ser = ComicSerializer(instance=result, many=True)
+        ser = serializers.ComicSerializer(instance=result, many=True)
         return Response({'count': page_object.count, 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
-        ser = ComicSerializer(data=request.data)
+        ser = serializers.ComicSerializer(data=request.data)
         if ser.is_valid():
             ser.save()
             return Response({"status": "success"})
@@ -124,14 +108,14 @@ class Comic_Author(APIView):
         if not uid:
             return Response({"status": "failed:请携带uid参数", "results": {}})
         decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
-        queryset = Comic_author.objects.filter(uid=decode_str.decode()).first()
-        ser = ComicAuthorSerializer(instance=queryset, many=False)
+        queryset = models.Comic_author.objects.filter(uid=decode_str.decode()).first()
+        ser = serializers.ComicAuthorSerializer(instance=queryset, many=False)
         if not ser:
             return Response({"status": "failed:请携带正确的uid参数", "results": {}})
         return Response({'status': "successful", 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
-        ser = ComicAuthorSerializer(data=request.data)
+        ser = serializers.ComicAuthorSerializer(data=request.data)
         if ser.is_valid():
             ser.save()
             return Response({"status": "success"})
@@ -151,20 +135,20 @@ class Comic_chapters(APIView):
         cid = request.GET.get("cid")
         if not cid:
             decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
-            queryset = Comic_chapter.objects.filter(uid=decode_str.decode()).order_by("chapter_number")
+            queryset = models.Comic_chapter.objects.filter(uid=decode_str.decode()).order_by("chapter_number")
             # 声明分页类
             page_object = ComicChapterLimitOffsetPagination()
             result = page_object.paginate_queryset(queryset, request, self)
-            ser = ComicChapterCatalogSerializer(instance=result, many=True)
+            ser = serializers.ComicChapterCatalogSerializer(instance=result, many=True)
             return Response({'count': page_object.count, 'results': ser.data})
         else:
             decode_str = base64.decodebytes(bytes(uid, encoding="utf-8"))
-            queryset = Comic_chapter.objects.filter(uid=decode_str.decode(), cid=cid).first()
-            ser = ComicChapterSerializer(instance=queryset, many=False)
+            queryset = models.Comic_chapter.objects.filter(uid=decode_str.decode(), cid=cid).first()
+            ser = serializers.ComicChapterSerializer(instance=queryset, many=False)
             return Response({'status': 0, 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
-        ser = ComicChapterSerializer(data=request.data)
+        ser = serializers.ComicChapterSerializer(data=request.data)
         if ser.is_valid():
             ser.save()
             return Response({"status": "success"})
@@ -183,15 +167,23 @@ class AVideos(APIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, *args, **kwargs):
-        queryset = AVideo.objects.all().order_by("-judge")
-        # 声明分页类
-        page_object = AVideoLimitOffsetPagination()
-        result = page_object.paginate_queryset(queryset, request, self)
-        ser = AVideoSerializer(instance=result, many=True)
-        return Response({'count': page_object.count, 'results': ser.data})
+        # keyword定义查询条件
+        keyword = request.GET.get("keyword")
+        if keyword == "" or keyword is None:
+            queryset = models.AVideo.objects.all().order_by("-judge")
+            page_object = AVideoLimitOffsetPagination()
+            result = page_object.paginate_queryset(queryset, request, self)
+            ser = serializers.AVideoSerializer(instance=result, many=True)
+            return Response({'count': page_object.count, 'results': ser.data})
+        else:
+            queryset = models.AVideo.objects.filter(title__contains=keyword).order_by("-judge")
+            page_object = AVideoLimitOffsetPagination()
+            result = page_object.paginate_queryset(queryset, request, self)
+            ser = serializers.AVideoSerializer(instance=result, many=True)
+            return Response({'count': page_object.count, 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
-        ser = AVideoSerializer(data=request.data)
+        ser = serializers.AVideoSerializer(data=request.data)
         if ser.is_valid():
             ser.save()
             return Response({"status": "success"})
@@ -206,13 +198,13 @@ class AVideoChapters(APIView):
 
     def get(self, request, *args, **kwargs):
         vid = request.GET.get("vid")
-        queryset = AVideo_chapter.objects.filter(vid=vid)
+        queryset = models.AVideo_chapter.objects.filter(vid=vid)
         # 声明分页类
-        ser = AVideoChapterSerializer(instance=queryset, many=True)
+        ser = serializers.AVideoChapterSerializer(instance=queryset, many=True)
         return Response({'status': 200, 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
-        ser = AVideoChapterSerializer(data=request.data)
+        ser = serializers.AVideoChapterSerializer(data=request.data)
         if ser.is_valid():
             ser.save()
             return Response({"status": "success"})
@@ -227,15 +219,15 @@ class AImages(APIView):
 
     def get(self, request, *args, **kwargs):
         category = request.GET.get("category")
-        queryset = APicture.objects.filter(category=category)
+        queryset = models.APicture.objects.filter(category=category)
         # 声明分页类
         page_object = AVideoLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
-        ser = APictureSerializer(instance=result, many=True)
+        ser = serializers.APictureSerializer(instance=result, many=True)
         return Response({'count': page_object.count, 'results': ser.data})
 
     def post(self, request, *args, **kwargs):
-        ser = APictureSerializer(data=request.data)
+        ser = serializers.APictureSerializer(data=request.data)
         if ser.is_valid():
             ser.save()
             return Response({"status": "success"})
@@ -246,7 +238,7 @@ class AImages(APIView):
 # 短视频解析模块
 from .middleware import bilibili_parse, haokan_parse, douyin_parse, sixroom_parse, quanmin_parse, pearvideo_parse, \
     meipai_parse, changku_parse, weibo_parse, zuiyou_parse, pipixia_parse, acfun_parse, kuaishou_parse, momo_parse, \
-    kge_parse, xigua_parse, miaopai_parse, xhs_parse, xks_parse, qsp_parse, kaiyan_parse, weishi_parse, huoshan_parse,\
+    kge_parse, xigua_parse, miaopai_parse, xhs_parse, xks_parse, qsp_parse, kaiyan_parse, weishi_parse, huoshan_parse, \
     huya_parse, douyin2_parse, lvzhou_parse, pipifunny, vue_parse, bixin_parse, doupai_parse, before_parse, kuxiu_parse
 
 
@@ -437,7 +429,7 @@ class Comments_Reply(APIView):
         # 声明分页类(借用之前隐私视频的分页功能)
         page_object = AVideoLimitOffsetPagination()
         result = page_object.paginate_queryset(queryset, request, self)
-        ser = CommentsSerializer(instance=result, many=True)
+        ser = serializers.CommentsSerializer(instance=result, many=True)
         return Response({'count': page_object.count, 'results': ser.data})
 
     # post请求创建留言板
@@ -447,7 +439,7 @@ class Comments_Reply(APIView):
         decode_str = base64.decodebytes(bytes(cate, encoding="utf-8"))  # 字节型
         decode_ip = decode_str.decode()
         info["ip"] = decode_ip
-        ser = CommentsSerializer(data=info)
+        ser = serializers.CommentsSerializer(data=info)
         print(request.data)
         if ser.is_valid():
             ser.save()
