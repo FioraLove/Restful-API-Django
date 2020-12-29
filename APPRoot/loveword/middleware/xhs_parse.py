@@ -27,13 +27,13 @@ class XiaoHongShu(object):
                           "Chrome/79.0.3945.88 Safari/537.36"
         }
         source_headers = {
-            "cookie": "xhsTrackerId=6e8cc536-0d57-4226-c27c-831a6e51c4cc; "
-                      "Hm_lvt_d0ae755ac51e3c5ff9b1596b0c09c826=1593488621,1593488692,1593488706; "
+            "cookie": "xhsTrackerId=6e8cc536-0d57-4226-c27c-831a6e51c4cc; xhsuid=6KOIxzWIclOk5WsI; "
+                      "Hm_lvt_d0ae755ac51e3c5ff9b1596b0c09c826=1606207238; "
                       "xhsTracker=url=noteDetail&xhsshare=CopyLink; extra_exp_ids=gif_exp1,ques_exp1; "
-                      "xhsuid=6KOIxzWIclOk5WsI; timestamp2=20201012ef45ffd4004e2dcc5b3efb33; "
-                      "timestamp2.sig=Jr645nmjd1yv_OKiCv2Sv63XInSbvHfSrB57YdkppLg; xhs_spses.5dde=*; "
-                      "xhs_spid.5dde=05e7787428e31fd4.1593488621.4.1602469704.1593498973.7788de5a-9875-44ab-9ac0"
-                      "-200218254fbe ",
+                      "timestamp2=20201229ef45ffd4004e2dcc00c97dec; "
+                      "timestamp2.sig=a95ob3HUIi0pV4z3n8kQHuJ2sk3HjHT-XdYVwbgEHbs; xhs_spses.5dde=*; "
+                      "xhs_spid.5dde=05e7787428e31fd4.1593488621.11.1609225136.1607129499.6465ec57-2e5f-4f43-aaf1"
+                      "-161a7fd7a7e6",
             "Upgrade-Insecure-Requests": "1",
             "Pragma": "no-cache",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
