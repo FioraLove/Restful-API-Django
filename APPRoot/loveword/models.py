@@ -139,3 +139,13 @@ class Bilibili(models.Model):
     play = models.IntegerField(verbose_name="播放量", blank=True, null=True, default=0)
     ts = models.IntegerField(verbose_name="时间戳", blank=True, null=True)
     objects = models.Manager()
+
+
+class Quotation(models.Model):
+    """
+    精神小伙经典语录
+        1: 社会精神小伙经典语录
+    """
+    category = models.IntegerField(verbose_name="类型", blank=True, null=True, default=1)
+    content = models.CharField(verbose_name="文本内容", max_length=255, blank=False, default="社会经典语录")
+    objects = models.Manager()

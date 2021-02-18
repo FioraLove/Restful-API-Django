@@ -36,5 +36,12 @@ urlpatterns = [
     path("api/secret/picture/", views.AImages.as_view()),
 
     # 留言，回复api
-    path("api/comments/", views.Comments_Reply.as_view())
+    path("api/comments/", views.Comments_Reply.as_view()),
+
+    # 跨域文件下载api
+    # path("api/download/", views.FileDownload, name="download"),
+    path("api/download/", views.FileDownload.as_view()),
+
+    # 社会经典语录api
+    path("api/yulu", views.Quotations.as_view()),
 ]

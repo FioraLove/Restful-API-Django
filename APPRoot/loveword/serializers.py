@@ -7,6 +7,7 @@ class BilibiliIndex(serializers.ModelSerializer):
     """
     bilibili-个人主页
     """
+
     class Meta:
         model = models.Bilibili
         fields = "__all__"
@@ -85,5 +86,13 @@ class APictureSerializer(serializers.ModelSerializer):
 class CommentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Comments
+        fields = "__all__"
+        depth = 1
+
+
+# 社会小伙经典语录序列化
+class QuotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Quotation
         fields = "__all__"
         depth = 1
