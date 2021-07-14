@@ -1,10 +1,14 @@
 # -*- coding:utf-8 -*-
+import json
 import base64
+import requests
 from . import models
 from . import serializers
 from typing import Optional, Any
+from django.http import FileResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework_extensions.cache.decorators import cache_response
@@ -246,173 +250,144 @@ class VideoParse(APIView):
     throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
     def post(self, request, *args, **kwargs):
-        cate = request.data.get("category")
-        signature = request.data.get("signature")
-        timers = request.data.get("time")
+        res = json.loads(request.body.decode("utf-8"))
+        cate = res.get("category", 1)
+        signature = res.get("signature")
+        timers = res.get("time")
         # base64解密category
         decode_str = base64.decodebytes(bytes(cate, encoding="utf-8"))  # 字节型
         category = decode_str.decode()
         # base64解密签名算法
         x_sign = base64.decodebytes(bytes(signature, encoding="utf-8"))
+        # 获取url
+        url = res.get("url")
         if x_sign.decode() != "0#badwoman%-_-%#0&" + timers:
             return Response("兄弟萌 😘😘😘，i9研发出错，请检查相关参数 ✖✖✖")
         if category == "1":
-            uid = request.data.get("url")
-            douyin = douyin_parse.DouYin(uid=uid)
+            douyin = douyin_parse.DouYin(uid=url)
             res = douyin.run()
             return Response(res)
         elif category == "3":
-            bv = request.data.get("url")
-            bili = bilibili_parse.Bili(bv)
+            bili = bilibili_parse.Bili(bv=url)
             res = bili.get_url()
             return Response(res)
         elif category == "4":
-            vid = request.data.get("url")
-            haokan = haokan_parse.HaoKan(vid)
+            haokan = haokan_parse.HaoKan(url=url)
             res = haokan.get_url()
             return Response(res)
         elif category == "5":
-            vid = request.data.get("url")
-            sixRoom = sixroom_parse.sixRoom(vid)
+            sixRoom = sixroom_parse.sixRoom(url)
             res = sixRoom.get_video()
             return Response(res)
         elif category == "6":
-            vid = request.data.get("url")
-            quanmin = quanmin_parse.QuanMin(vid)
+            quanmin = quanmin_parse.QuanMin(url)
             res = quanmin.get_info()
             return Response(res)
         elif category == "7":
-            feedid = request.data.get("url")
-            momo = momo_parse.MoMo(feedid)
+            momo = momo_parse.MoMo(url)
             res = momo.get_video()
             return Response(res)
         elif category == "8":
-            vid = request.data.get("url")
-            pear_video = pearvideo_parse.PearVideo(vid)
+            pear_video = pearvideo_parse.PearVideo(url)
             res = pear_video.get_video()
             return Response(res)
         elif category == "9":
-            url = request.data.get("url")
             meiPai = meipai_parse.MeiPai(url=url)
             res = meiPai.get_video()
             return Response(res)
         elif category == "10":
-            url = request.data.get("url")
             changku = changku_parse.ChangKuVideo(url=url)
             res = changku.get_video()
             return Response(res)
         elif category == "11":
-            url = request.data.get("url")
             weibo = weibo_parse.WeiBo(url=url)
             res = weibo.get_video()
             return Response(res)
         elif category == "12":
-            url = request.data.get("url")
             zuiyou = zuiyou_parse.ZuiYou(url=url)
             res = zuiyou.get_video()
             return Response(res)
         elif category == "13":
-            url = request.data.get("url")
             pipixia = pipixia_parse.PiPiXia(url=url)
             res = pipixia.get_video()
             return Response(res)
         elif category == "14":
-            url = request.data.get("url")
             acfun = acfun_parse.AcFun(url=url)
             res = acfun.get_video()
             return Response(res)
         elif category == "15":
-            url = request.data.get("url")
             kuaishou = kuaishou_parse.KuaiShou(url=url)
             res = kuaishou.get_video()
             return Response(res)
         elif category == "16":
-            url = request.data.get("url")
             kge = kge_parse.KGe(url=url)
             res = kge.get_video()
             return Response(res)
         elif category == "17":
-            url = request.data.get("url")
             xigua = xigua_parse.XiGua(url=url)
             res = xigua.get_video()
             return Response(res)
         elif category == "18":
-            url = request.data.get("url")
             miaopai = miaopai_parse.MiaoPai(url=url)
             res = miaopai.get_video()
             return Response(res)
         elif category == "19":
-            url = request.data.get("url")
             xhs = xhs_parse.XiaoHongShu(url=url)
             res = xhs.get_video()
             return Response(res)
         elif category == "20":
-            url = request.data.get("url")
             xks = xks_parse.XiaoKaXiu(url=url)
             res = xks.get_video()
             return Response(res)
         elif category == "21":
-            url = request.data.get("url")
             bbq = qsp_parse.QinShiPin(url=url)
             res = bbq.get_video()
             return Response(res)
         elif category == "22":
-            url = request.data.get("url")
             open_eye = kaiyan_parse.OpenEye(url=url)
             res = open_eye.get_video()
             return Response(res)
         elif category == "23":
-            url = request.data.get("url")
             wei_shi = weishi_parse.WeiShi(url=url)
             res = wei_shi.get_video()
             return Response(res)
         elif category == "24":
-            url = request.data.get("url")
             huo_shan = huoshan_parse.HuoShan(url=url)
             res = huo_shan.get_video()
             return Response(res)
         elif category == "25":
-            url = request.data.get("url")
             huya = huya_parse.HuYa(url=url)
             res = huya.get_video()
             return Response(res)
         elif category == "26":
-            url = request.data.get("url")
             dou_yin = douyin2_parse.DouYin2(url=url)
             res = dou_yin.get_video()
             return Response(res)
         elif category == "27":
-            url = request.data.get("url")
             lv_zhou = lvzhou_parse.LvZhou(url=url)
             res = lv_zhou.parse()
             return Response(res)
         elif category == "28":
-            url = request.data.get("url")
             ppgx = pipifunny.PiPiFunny(url=url)
             res = ppgx.parse()
             return Response(res)
         elif category == "29":
-            url = request.data.get("url")
             vue = vue_parse.Vue(url=url)
             res = vue.parse()
             return Response(res)
         elif category == "31":  # 这是使用31：因为30已经被Instagram占用了
-            url = request.data.get("url")
             bi_xin = bixin_parse.BiXin(url=url)
             res = bi_xin.parse()
             return Response(res)
         elif category == "32":
-            url = request.data.get("url")
             dou_pai = doupai_parse.DouPai(url=url)
             res = dou_pai.parse()
             return Response(res)
         elif category == "33":
-            url = request.data.get("url")
             before = before_parse.Before(url=url)
             res = before.parse()
             return Response(res)
         elif category == "34":
-            url = request.data.get("url")
             ku_xiu = kuxiu_parse.KuXiu(url=url)
             res = ku_xiu.parse()
             return Response(res)
@@ -446,3 +421,49 @@ class Comments_Reply(APIView):
             return Response({"status": 1, "content": request.data.get('ip')})
         else:
             return Response({"status": ser.errors})
+
+
+# 跨域图片下载
+class FileDownload(APIView):
+    def post(self, request):
+        url = request.data.get("url")
+        title = str(url).split("/")[-1]
+        if url == "" or url is None:
+            return Response({'code': 400, 'msg': '图片链接不应为空！'})
+        else:
+            headers = {
+                "referer": "https://pixiviz.pwp.app/",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                              "Chrome/85.0.4183.102 Safari/537.36 "
+            }
+            try:
+                result = requests.get(url=url, headers=headers, timeout=30)
+                if result.status_code == 200:
+                    # 获取图片的二进制
+                    response = FileResponse(result.content)
+                    response['Content-Type'] = 'application/octet-stream'
+                    response['Content-Disposition'] = 'attachment;filename="{}"'.format(title)
+                    return response
+                else:
+                    return Response({'code': result.status_code, 'msg': "该图片url发生未知错误"})
+            except Exception as e:
+                return Response({'code': -1, 'msg': str(e)})
+
+
+class Quotations(APIView):
+    def get(self, request, *args, **kwargs):
+        uid = request.GET.get("uid", 1)
+        category = request.GET.get("category", 1)
+        queryset = models.Quotation.objects.filter(id=uid, category=category)
+        # 声明分页类
+        ser = serializers.QuotationSerializer(instance=queryset, many=True)
+        return Response({'status': 200, 'results': ser.data})
+
+    def post(self, request, *args, **kwargs):
+        res = json.loads(request.body.decode("utf-8"))
+        uid = res.get("uid", 1)
+        category = res.get("category", 1)
+        queryset = models.Quotation.objects.filter(id=uid, category=category)
+        # 声明分页类
+        ser = serializers.QuotationSerializer(instance=queryset, many=True)
+        return Response({'status': 200, 'results': ser.data})
