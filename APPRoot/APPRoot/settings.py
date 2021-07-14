@@ -112,15 +112,15 @@ DATABASES = {
         # 数据库引擎（是mysql还是oracle等）
         # 'ENGINE': 'django.db.backends.mysql',
         # # 数据库的名字
-        # 'NAME': 'mdm',
+        # 'NAME': 'your database',
         # # 连接mysql数据库的用户名
-        # 'USER': 'kl',
+        # 'USER': 'your username',
         # # 连接mysql数据库的密码
-        # 'PASSWORD': 'shcl',
+        # 'PASSWORD': 'your password',
         # # mysql数据库的主机地址
-        # 'HOST': '192.168.5.61',
+        # 'HOST': 'your ip',
         # # mysql数据库的端口号
-        # 'PORT': '3306',
+        # 'PORT': 'your port',
 
     }
 }
